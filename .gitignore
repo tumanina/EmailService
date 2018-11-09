@@ -1,0 +1,6 @@
+.vs/EmailService/v15/Server/sqlite3/db.lock
+EmailService/bin/
+EmailService/obj/
+packages/
+Tests/EmailService.Unit.Tests/bin/
+Tests/EmailService.Unit.Tests/obj/

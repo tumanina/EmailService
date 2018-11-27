@@ -41,7 +41,7 @@ namespace EmailService.MessageBroker
                 {
                     var body = ea.Body;
                     var message = JsonConvert.DeserializeObject<EmailMessage>(Encoding.UTF8.GetString(body));
-                    _service.SendEmail(message.Email, message.Subject, message.Body);
+                    _service.SendEmail(message.Email, message.Title, message.Body);
                     channel.BasicAck(ea.DeliveryTag, false);
                 };
 

@@ -7,8 +7,8 @@ namespace EmailService.MessageBroker
         [JsonProperty("email")]
         public string Email { get; set; }
 
-        [JsonProperty("subject")]
-        public string Subject { get; set; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
 
         [JsonProperty("body")]
         public string Body { get; set; }

@@ -1,5 +1,5 @@
 ﻿using ElasticEmailClient;
-using MultiWalletWorker.Configuration;
+using EmailService.Configuration;
 using System.Collections.Generic;
 
 namespace EmailService

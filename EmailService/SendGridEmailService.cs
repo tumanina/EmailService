@@ -1,4 +1,4 @@
-﻿using MultiWalletWorker.Configuration;
+﻿using EmailService.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 

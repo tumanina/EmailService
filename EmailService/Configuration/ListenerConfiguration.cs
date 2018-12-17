@@ -1,6 +1,4 @@
-﻿using EmailService.Configuration;
-
-namespace MultiWalletWorker.Configuration
+﻿namespace EmailService.Configuration
 {
     public class ListenerConfiguration
     {

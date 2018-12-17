@@ -1,4 +1,4 @@
-﻿namespace MultiWalletWorker.Configuration
+﻿namespace EmailService.Configuration
 {
     public class ElasticConfiguration
     {

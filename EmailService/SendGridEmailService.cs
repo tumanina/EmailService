@@ -15,10 +15,7 @@ namespace EmailService
 
         public EmailServiceType Type
         {
-            get
-            {
-                return EmailServiceType.SendGrid;
-            }
+            get { return EmailServiceType.SendGrid; }
         }
 
         public void SendEmail(string email, string subject, string body)

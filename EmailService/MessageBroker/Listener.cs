@@ -22,7 +22,7 @@ namespace EmailService.MessageBroker
             _exchangeName = exchangeName;
             _connectionFactory = connectionFactory;
 
-            _service = services.FirstOrDefault(t => t.Type == EmailServiceType.SendGrid);
+            _service = services.FirstOrDefault(t => t.Type == EmailServiceType.Elastic);
         }
 
         public void Run()

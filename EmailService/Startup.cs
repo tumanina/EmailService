@@ -26,7 +26,9 @@ namespace EmailService
             services.AddMvc();
 
             var sendGridConfiguration = Configuration.GetSection("SendGrid").Get<SendGridConfiguration>();
+            var elasticConfiguration = Configuration.GetSection("Elastic").Get<ElasticConfiguration>();
             services.AddSingleton<IEmailService>(t => new SendGridEmailService(sendGridConfiguration));
+            services.AddSingleton<IEmailService>(t => new ElasticEmailService(elasticConfiguration));
 
             var listeners = Configuration.GetSection("Listeners").Get<IEnumerable<ListenerConfiguration>>();
 

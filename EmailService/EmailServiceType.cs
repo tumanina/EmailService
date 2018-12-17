@@ -4,6 +4,7 @@
     {
         None = 0,
         SendGrid = 1,
-        Gmail = 2
+        Elastic = 2,
+        Gmail = 3
     }
 }

@@ -27,6 +27,7 @@ namespace EmailService
 
             var sendGridConfiguration = Configuration.GetSection("SendGrid").Get<SendGridConfiguration>();
             var elasticConfiguration = Configuration.GetSection("Elastic").Get<ElasticConfiguration>();
+            services.AddSingleton<IConsumerFactory, ConsumerFactory>();
             services.AddSingleton<IEmailService>(t => new SendGridEmailService(sendGridConfiguration));
             services.AddSingleton<IEmailService>(t => new ElasticEmailService(elasticConfiguration));
 
@@ -44,6 +45,7 @@ namespace EmailService
                         UserName = listener.Server.UserName,
                         Password = listener.Server.Password
                     },
+                    serviceProvider.GetService<IConsumerFactory>(),
                     listener.QueueName,
                     listener.ExchangeName,
                     serviceProvider.GetServices<IEmailService>()));

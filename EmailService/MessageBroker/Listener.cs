@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace EmailService.MessageBroker
 {
@@ -12,12 +11,14 @@ namespace EmailService.MessageBroker
     {
         private readonly IEmailService _service;
         private readonly IConnectionFactory _connectionFactory;
+        private readonly IConsumerFactory _consumerFactory;
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly string _type;
 
-        public Listener(IConnectionFactory connectionFactory, string queueName, string exchangeName, IEnumerable<IEmailService> services)
+        public Listener(IConnectionFactory connectionFactory, IConsumerFactory consumerFactory, string queueName, string exchangeName, IEnumerable<IEmailService> services)
         {
+            _consumerFactory = consumerFactory;
             _queueName = queueName;
             _exchangeName = exchangeName;
             _connectionFactory = connectionFactory;
@@ -36,7 +37,7 @@ namespace EmailService.MessageBroker
                 channel.QueueDeclare(_queueName, true, false, false, null);
                 channel.QueueBind(_queueName, _exchangeName, _queueName, null);
 
-                var consumer = new EventingBasicConsumer(channel);
+                var consumer = _consumerFactory.CreateEventConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;

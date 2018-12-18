@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "EmailServic
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FA8C6280-7162-4BCB-824C-46E8D2FAC087}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Unit.Tests", "Tests\EmailService.Unit.Tests\EmailService.Unit.Tests.csproj", "{25C7F242-6810-4823-8827-A6D8C9923DF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Unit.Tests", "Tests\EmailService.Unit.Tests\EmailService.Unit.Tests.csproj", "{4F63377C-CAF1-4525-87C0-38C71D40F8F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,16 +19,16 @@ Global
 		{B41A3626-B5E8-4887-9373-3AC6F8474631}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B41A3626-B5E8-4887-9373-3AC6F8474631}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B41A3626-B5E8-4887-9373-3AC6F8474631}.Release|Any CPU.Build.0 = Release|Any CPU
-		{25C7F242-6810-4823-8827-A6D8C9923DF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{25C7F242-6810-4823-8827-A6D8C9923DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{25C7F242-6810-4823-8827-A6D8C9923DF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{25C7F242-6810-4823-8827-A6D8C9923DF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F63377C-CAF1-4525-87C0-38C71D40F8F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F63377C-CAF1-4525-87C0-38C71D40F8F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F63377C-CAF1-4525-87C0-38C71D40F8F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F63377C-CAF1-4525-87C0-38C71D40F8F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{25C7F242-6810-4823-8827-A6D8C9923DF0} = {FA8C6280-7162-4BCB-824C-46E8D2FAC087}
+		{4F63377C-CAF1-4525-87C0-38C71D40F8F6} = {FA8C6280-7162-4BCB-824C-46E8D2FAC087}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D8C6E23-EE12-4FE6-86C2-18C304B4812E}

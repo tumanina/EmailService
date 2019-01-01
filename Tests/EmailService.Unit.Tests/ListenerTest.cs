@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using EmailService.MessageBroker;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RabbitMQ.Client;
@@ -17,6 +18,7 @@ namespace EmailService.Unit.Tests
         private static readonly Mock<IConsumerFactory> ConsumerFactory = new Mock<IConsumerFactory>();
         private static readonly Mock<IEmailService> EmailService1 = new Mock<IEmailService>();
         private static readonly Mock<IEmailService> EmailService2 = new Mock<IEmailService>();
+        private static readonly Mock<ILogger<Listener>> Logger = new Mock<ILogger<Listener>>();
 
         [TestMethod]
         public void Run_ProcessorExists_ShouldRunAndListenMessages()
@@ -82,7 +84,7 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
+            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object }, Logger.Object);
 
             listener.Run();
 
@@ -109,7 +111,7 @@ namespace EmailService.Unit.Tests
         }
 
         [TestMethod]
-        public void Run_ServiceNotExisted_ThrowException()
+        public void Run_ServiceNotExisted_BreakAndDontReadMessagesNoException()
         {
             ResetCalls();
 
@@ -172,28 +174,19 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
+            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object } , Logger.Object);
 
-            try
-            {
-                listener.Run();
-                Assert.Fail();
-            }
-            catch
-            { }
-            finally
-            {
-                consumer.HandleBasicDeliver("consumer tag", 1, false, exchangeName, exchangeName, null, messageBody);
+            listener.Run();
+            consumer.HandleBasicDeliver("consumer tag", 1, false, exchangeName, exchangeName, null, messageBody);
 
-                ConnectionFactory.Verify(x => x.CreateConnection(), Times.Never);
-                Connection.Verify(x => x.CreateModel(), Times.Never);
-                Model.Verify(x => x.ExchangeDeclare(exchangeName, ExchangeType.Direct, true, false, null), Times.Never);
-                Model.Verify(x => x.QueueDeclare(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>()), Times.Never);
-                Model.Verify(x => x.QueueBind(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null), Times.Never);
-                Model.Verify(x => x.BasicAck(It.IsAny<ulong>(), It.IsAny<bool>()), Times.Never);
-                EmailService1.Verify(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-                EmailService2.Verify(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            }
+            ConnectionFactory.Verify(x => x.CreateConnection(), Times.Never);
+            Connection.Verify(x => x.CreateModel(), Times.Never);
+            Model.Verify(x => x.ExchangeDeclare(exchangeName, ExchangeType.Direct, true, false, null), Times.Never);
+            Model.Verify(x => x.QueueDeclare(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>()), Times.Never);
+            Model.Verify(x => x.QueueBind(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null), Times.Never);
+            Model.Verify(x => x.BasicAck(It.IsAny<ulong>(), It.IsAny<bool>()), Times.Never);
+            EmailService1.Verify(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            EmailService2.Verify(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         private void ResetCalls()

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EmailService
@@ -31,6 +32,17 @@ namespace EmailService
             services.AddSingleton<IEmailService>(t => new SendGridEmailService(sendGridConfiguration));
             services.AddSingleton<IEmailService>(t => new ElasticEmailService(elasticConfiguration));
 
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Information);
+                builder.AddNLog(new NLogProviderOptions
+                {
+                    CaptureMessageTemplates = true,
+                    CaptureMessageProperties = true
+                });
+            });
+            NLog.LogManager.LoadConfiguration("nlog.config");
+
             var listeners = Configuration.GetSection("Listeners").Get<IEnumerable<ListenerConfiguration>>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -39,7 +51,9 @@ namespace EmailService
             {
                 foreach (var listener in listeners)
                 {
-                    services.AddSingleton<IListener>(t => new Listener(new ConnectionFactory
+                    services.AddSingleton<IListener>(t => new Listener(
+                    EmailServiceType.Elastic,
+                    new ConnectionFactory
                     {
                         HostName = listener.Server.Host,
                         UserName = listener.Server.UserName,
@@ -48,7 +62,8 @@ namespace EmailService
                     serviceProvider.GetService<IConsumerFactory>(),
                     listener.QueueName,
                     listener.ExchangeName,
-                    serviceProvider.GetServices<IEmailService>()));
+                    serviceProvider.GetServices<IEmailService>(),
+                    serviceProvider.GetService<ILogger<Listener>>()));
                 }
             }
         }

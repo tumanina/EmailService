@@ -27,7 +27,6 @@ namespace EmailService
             ApiTypes.EmailSend result = null;
             Api.ApiKey = apiKey;
             result = Api.Email.SendAsync(subject: subject, from: fromEmail, fromName: fromName, msgTo: new List<string> { email }, bodyText: body).Result;
-
         }
     }
 }

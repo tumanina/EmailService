@@ -5,8 +5,8 @@ namespace EmailService.MessageBroker
 {
     public class EmailMessage
     {
-        [JsonProperty("type")]
-        public EmailServiceType Type { get; set; }
+        [JsonProperty("provider")]
+        public EmailProvider Provider { get; set; }
 
         [JsonProperty("email")]
         public string Email { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace EmailService.Models
 {
-    public enum EmailServiceType
+    public enum EmailProvider
     {
         None = 0,
         SendGrid = 1,

@@ -3,7 +3,6 @@ using EmailService.Configuration;
 using EmailService.Interfaces;
 using EmailService.Models;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace EmailService.Services
 {
@@ -16,9 +15,9 @@ namespace EmailService.Services
             _configuration = configuration.Value;
         }
 
-        public EmailServiceType Type
+        public EmailProvider Provider
         {
-            get { return EmailServiceType.Elastic; }
+            get { return EmailProvider.Elastic; }
         }
 
         public void SendEmail(string email, string subject, string body)
@@ -30,6 +29,11 @@ namespace EmailService.Services
             ApiTypes.EmailSend result = null;
             Api.ApiKey = apiKey;
             result = Api.Email.SendAsync(subject: subject, from: fromEmail, fromName: fromName, msgTo: new List<string> { email }, bodyText: body).Result;
+        }
+
+        public void SendEmail(string email, string templateId, Dictionary<string, string> parameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -16,9 +16,9 @@ namespace EmailService.Services
             _configuration = configuration.Value;
         }
 
-        public EmailServiceType Type
+        public EmailProvider Provider
         {
-            get { return EmailServiceType.SendGrid; }
+            get { return EmailProvider.SendGrid; }
         }
 
         public void SendEmail(string email, string subject, string body)
@@ -26,6 +26,16 @@ namespace EmailService.Services
             var apiKey = _configuration.ApiKey;
             var client = new SendGridClient(apiKey);
             var msg = MailHelper.CreateSingleEmail(new EmailAddress(_configuration.Email, _configuration.Name), new EmailAddress(email), subject, body, string.Empty);
+
+            var response = client.SendEmailAsync(msg).Result;
+        }
+
+        public void SendEmail(string email, string templateId, Dictionary<string, string> parameters)
+        {
+            var apiKey = _configuration.ApiKey;
+            var client = new SendGridClient(apiKey);
+
+            var msg = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_configuration.Email, _configuration.Name), new EmailAddress(email), templateId, parameters);
 
             var response = client.SendEmailAsync(msg).Result;
         }

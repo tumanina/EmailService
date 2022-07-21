@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Text;
+using EmailService.Configuration;
 using EmailService.Interfaces;
 using EmailService.MessageBroker;
 using EmailService.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RabbitMQ.Client;
@@ -21,6 +23,7 @@ namespace EmailService.Unit.Tests
         private static readonly Mock<IEmailService> EmailService1 = new Mock<IEmailService>();
         private static readonly Mock<IEmailService> EmailService2 = new Mock<IEmailService>();
         private static readonly Mock<ILogger<Listener>> Logger = new Mock<ILogger<Listener>>();
+        private static readonly Mock<IOptions<ListenerConfiguration>> Configuration = new Mock<IOptions<ListenerConfiguration>>();
 
         [TestMethod]
         public void Run_ProcessorExists_ShouldRunAndListenMessages()
@@ -69,7 +72,7 @@ namespace EmailService.Unit.Tests
             Connection.Setup(x => x.CreateModel()).Returns(Model.Object);
             ConnectionFactory.Setup(x => x.CreateConnection()).Returns(Connection.Object);
 
-            EmailService1.Setup(x => x.Type).Returns(EmailServiceType.SendGrid);
+            EmailService1.Setup(x => x.Provider).Returns(EmailProvider.SendGrid);
             EmailService1.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string, string>((emailParam, titleParam, bodyParam) =>
                 {
@@ -77,7 +80,7 @@ namespace EmailService.Unit.Tests
                     processedTitle = titleParam;
                     processedBody = bodyParam;
                 });
-            EmailService2.Setup(x => x.Type).Returns(EmailServiceType.Elastic);
+            EmailService2.Setup(x => x.Provider).Returns(EmailProvider.Elastic);
             EmailService2.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string, string>((emailParam, titleParam, bodyParam) =>
                 {
@@ -86,7 +89,7 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
+            var listener = new Listener(new List<IEmailService> { EmailService1.Object, EmailService2.Object }, Configuration.Object);
 
             listener.Run();
 
@@ -159,7 +162,7 @@ namespace EmailService.Unit.Tests
             Connection.Setup(x => x.CreateModel()).Returns(Model.Object);
             ConnectionFactory.Setup(x => x.CreateConnection()).Returns(Connection.Object);
 
-            EmailService1.Setup(x => x.Type).Returns(EmailServiceType.SendGrid);
+            EmailService1.Setup(x => x.Provider).Returns(EmailProvider.SendGrid);
             EmailService1.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string, string>((emailParam, titleParam, bodyParam) =>
                 {
@@ -167,7 +170,7 @@ namespace EmailService.Unit.Tests
                     processedTitle = titleParam;
                     processedBody = bodyParam;
                 });
-            EmailService2.Setup(x => x.Type).Returns(EmailServiceType.Gmail);
+            EmailService2.Setup(x => x.Provider).Returns(EmailProvider.Gmail);
             EmailService2.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string, string>((emailParam, titleParam, bodyParam) =>
                 {
@@ -176,7 +179,7 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
+            var listener = new Listener(new List<IEmailService> { EmailService1.Object, EmailService2.Object }, Configuration.Object);
 
             listener.Run();
             consumer.HandleBasicDeliver("consumer tag", 1, false, exchangeName, exchangeName, null, messageBody);

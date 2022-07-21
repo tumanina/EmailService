@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EmailService.Controllers
 {
     [ApiController]
-    [Route("api/emails")]
+    [Route("api")]
     public class EmailSendingController : ControllerBase
     {
         private readonly ILogger<EmailSendingController> _logger;
@@ -18,16 +18,33 @@ namespace EmailService.Controllers
         }
 
         [HttpPost]
-        public IActionResult SendEmail(EmailToSendApiModel model)
+        [Route("text-emails")]
+        public IActionResult SendTextEmail(TextEmailApiModel model)
         {
-            var service = _services.FirstOrDefault(s => s.Type == model.Type);
+            var service = _services.FirstOrDefault(s => s.Provider == model.Provider);
 
             if (service == null)
             {
-                return BadRequest($"Type {model.Type} not supported.");
+                return BadRequest($"Provider {model.Provider} not supported.");
             }
 
             service.SendEmail(model.Email, model.Subject, model.Body);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("template-emails")]
+        public IActionResult SendTemplateEmail(TemplateEmailApiModel model)
+        {
+            var service = _services.FirstOrDefault(s => s.Provider == model.Provider);
+
+            if (service == null)
+            {
+                return BadRequest($"Provider {model.Provider} not supported.");
+            }
+
+            service.SendEmail(model.Email, model.TemplateId, model.TemplateParameters);
 
             return Ok();
         }

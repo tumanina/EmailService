@@ -16,9 +16,9 @@ namespace EmailService.Services
             _configuration = configuration.Value;
         }
 
-        public EmailServiceType Type
+        public EmailProvider Provider
         {
-            get { return EmailServiceType.SendInBlue; }
+            get { return EmailProvider.SendInBlue; }
         }
 
         public void SendEmail(string email, string subject, string body)
@@ -28,8 +28,21 @@ namespace EmailService.Services
             var apiInstance = new TransactionalEmailsApi();
 
             var emailMessage = new SendSmtpEmail(to: new List<SendSmtpEmailTo> { new SendSmtpEmailTo(email: email) },
-            sender: new SendSmtpEmailSender { Name = _configuration.Name, Email = _configuration.Email },
-            subject: subject, textContent: body);
+                sender: new SendSmtpEmailSender { Name = _configuration.Name, Email = _configuration.Email },
+                subject: subject, textContent: body);
+
+            var result = apiInstance.SendTransacEmail(emailMessage);
+        }
+
+        public void SendEmail(string email, string templateId, Dictionary<string, string> parameters)
+        {
+            sib_api_v3_sdk.Client.Configuration.Default.ApiKey.Add("api-key", _configuration.ApiKey);
+
+            var apiInstance = new TransactionalEmailsApi();
+
+            var emailMessage = new SendSmtpEmail(to: new List<SendSmtpEmailTo> { new SendSmtpEmailTo(email: email) },
+                sender: new SendSmtpEmailSender { Name = _configuration.Name, Email = _configuration.Email },
+                templateId: Convert.ToInt64(templateId));
 
             var result = apiInstance.SendTransacEmail(emailMessage);
         }

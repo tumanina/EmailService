@@ -29,7 +29,7 @@ namespace EmailService.MessageBroker
                 var message = JsonConvert.DeserializeObject<EmailMessage>(Encoding.UTF8.GetString(body.ToArray()));
                 if (message != null)
                 {
-                    var service = _services.FirstOrDefault(s => s.Type == message.Type);
+                    var service = _services.FirstOrDefault(s => s.Provider == message.Provider);
                     if (service != null)
                     {
                         service.SendEmail(message.Email, message.Subject, message.Body);
@@ -37,7 +37,7 @@ namespace EmailService.MessageBroker
                     }
                     else
                     {
-                        throw new Exception($"Email service for type '{message.Type}' not found");
+                        throw new Exception($"Email service for provider '{message.Provider}' not found");
                     }
                 }
             };

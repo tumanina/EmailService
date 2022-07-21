@@ -1,10 +1,8 @@
 ﻿using EmailService.Configuration;
 using EmailService.Interfaces;
 using EmailService.MessageBroker;
-using EmailService.Models;
 using EmailService.Services;
 using Microsoft.OpenApi.Models;
-using RabbitMQ.Client;
 
 namespace EmailService
 {
@@ -24,12 +22,12 @@ namespace EmailService
             services.Configure<SendGridConfiguration>(Configuration.GetSection("SendGrid"));
             services.Configure<ElasticConfiguration>(Configuration.GetSection("Elastic"));
             services.Configure<SendInBlueConfiguration>(Configuration.GetSection("SendInBlue"));
+            services.Configure<ListenerConfiguration>(Configuration.GetSection("Listener"));
             services.AddScoped<IConsumerFactory, ConsumerFactory>();
             services.AddScoped<IEmailService, SendGridEmailService>();
             services.AddScoped<IEmailService, ElasticEmailService>();
             services.AddScoped<IEmailService, SendInBlueEmailService>();
-
-            ConfigureListeners(services);
+            services.AddScoped<IListener, Listener>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -39,7 +37,7 @@ namespace EmailService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -58,32 +56,16 @@ namespace EmailService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
+            }); 
+            
+            RunListeners(serviceProvider);
         }
 
-        private void ConfigureListeners(IServiceCollection services)
+        private void RunListeners(IServiceProvider serviceProvider)
         {
-            var listeners = Configuration.GetSection("Listeners").Get<IEnumerable<ListenerConfiguration>>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            if (listeners != null)
+            foreach (var listener in serviceProvider.GetServices<IListener>())
             {
-                foreach (var listener in listeners)
-                {
-                    services.AddSingleton<IListener>(t => new Listener(
-                    EmailServiceType.Elastic,
-                    new ConnectionFactory
-                    {
-                        HostName = listener.Server.Host,
-                        UserName = listener.Server.UserName,
-                        Password = listener.Server.Password
-                    },
-                    serviceProvider.GetService<IConsumerFactory>(),
-                    listener.QueueName,
-                    listener.ExchangeName,
-                    serviceProvider.GetServices<IEmailService>()));
-                }
+                listener.Run();
             }
         }
     }

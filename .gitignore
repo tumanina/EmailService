@@ -4,3 +4,4 @@ EmailService/obj/
 packages/
 Tests/EmailService.Unit.Tests/bin/
 Tests/EmailService.Unit.Tests/obj/
+.vs/

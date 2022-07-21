@@ -1,16 +1,19 @@
 ﻿using ElasticEmailClient;
 using EmailService.Configuration;
+using EmailService.Interfaces;
+using EmailService.Models;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 
-namespace EmailService
+namespace EmailService.Services
 {
     public class ElasticEmailService : IEmailService
     {
         private ElasticConfiguration _configuration;
 
-        public ElasticEmailService(ElasticConfiguration configuration)
+        public ElasticEmailService(IOptions<ElasticConfiguration> configuration)
         {
-            _configuration = configuration;
+            _configuration = configuration.Value;
         }
 
         public EmailServiceType Type

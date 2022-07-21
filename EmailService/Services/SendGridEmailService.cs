@@ -1,16 +1,19 @@
 ﻿using EmailService.Configuration;
+using EmailService.Interfaces;
+using EmailService.Models;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace EmailService
+namespace EmailService.Services
 {
     public class SendGridEmailService : IEmailService
     {
         private SendGridConfiguration _configuration;
 
-        public SendGridEmailService(SendGridConfiguration configuration)
+        public SendGridEmailService(IOptions<SendGridConfiguration> configuration)
         {
-            _configuration = configuration;
+            _configuration = configuration.Value;
         }
 
         public EmailServiceType Type

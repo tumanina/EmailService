@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using EmailService.Configuration;
+﻿using EmailService.Configuration;
+using EmailService.Interfaces;
 using EmailService.MessageBroker;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
+using EmailService.Models;
+using EmailService.Services;
+using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
 namespace EmailService
@@ -21,28 +17,52 @@ namespace EmailService
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
 
-            var sendGridConfiguration = Configuration.GetSection("SendGrid").Get<SendGridConfiguration>();
-            var elasticConfiguration = Configuration.GetSection("Elastic").Get<ElasticConfiguration>();
-            services.AddSingleton<IConsumerFactory, ConsumerFactory>();
-            services.AddSingleton<IEmailService>(t => new SendGridEmailService(sendGridConfiguration));
-            services.AddSingleton<IEmailService>(t => new ElasticEmailService(elasticConfiguration));
+            services.Configure<SendGridConfiguration>(Configuration.GetSection("SendGrid"));
+            services.Configure<ElasticConfiguration>(Configuration.GetSection("Elastic"));
+            services.Configure<SendInBlueConfiguration>(Configuration.GetSection("SendInBlue"));
+            services.AddScoped<IConsumerFactory, ConsumerFactory>();
+            services.AddScoped<IEmailService, SendGridEmailService>();
+            services.AddScoped<IEmailService, ElasticEmailService>();
+            services.AddScoped<IEmailService, SendInBlueEmailService>();
 
-            services.AddLogging(builder =>
+            ConfigureListeners(services);
+
+            services.AddControllers();
+            services.AddSwaggerGen(c =>
             {
-                builder.SetMinimumLevel(LogLevel.Information);
-                builder.AddNLog(new NLogProviderOptions
-                {
-                    CaptureMessageTemplates = true,
-                    CaptureMessageProperties = true
-                });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Email service v1", Version = "v1" });
             });
-            NLog.LogManager.LoadConfiguration("nlog.config");
+        }
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Email service v1"));
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+
+        private void ConfigureListeners(IServiceCollection services)
+        {
             var listeners = Configuration.GetSection("Listeners").Get<IEnumerable<ListenerConfiguration>>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -62,29 +82,8 @@ namespace EmailService
                     serviceProvider.GetService<IConsumerFactory>(),
                     listener.QueueName,
                     listener.ExchangeName,
-                    serviceProvider.GetServices<IEmailService>(),
-                    serviceProvider.GetService<ILogger<Listener>>()));
+                    serviceProvider.GetServices<IEmailService>()));
                 }
-            }
-        }
-
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseMvc();
-
-            RunListeners(serviceProvider);
-        }
-
-        private void RunListeners(IServiceProvider serviceProvider)
-        {
-            foreach (var listener in serviceProvider.GetServices<IListener>())
-            {
-                listener.Run();
             }
         }
     }

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using EmailService.Interfaces;
+using EmailService.Models;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -16,15 +14,15 @@ namespace EmailService.MessageBroker
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly EmailServiceType _type;
-        private readonly ILogger<Listener> _logger;
 
-        public Listener(EmailServiceType type, IConnectionFactory connectionFactory, IConsumerFactory consumerFactory, string queueName, string exchangeName, IEnumerable<IEmailService> services, ILogger<Listener> logger)
+        public Listener(EmailServiceType type, IConnectionFactory connectionFactory, 
+            IConsumerFactory consumerFactory, string queueName, string exchangeName, 
+            IEnumerable<IEmailService> services)
         {
             _consumerFactory = consumerFactory;
             _queueName = queueName;
             _exchangeName = exchangeName;
             _connectionFactory = connectionFactory;
-            _logger = logger;
             _type = type;
 
             _service = services.FirstOrDefault(t => t.Type == type);
@@ -32,7 +30,6 @@ namespace EmailService.MessageBroker
 
         public void Run()
         {
-            _logger.LogError($"Listener for type '{_type}' have been started");
             if (_service != null)
             {
                 var connection = _connectionFactory.CreateConnection();
@@ -46,16 +43,19 @@ namespace EmailService.MessageBroker
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
-                    var message = JsonConvert.DeserializeObject<EmailMessage>(Encoding.UTF8.GetString(body));
-                    _service.SendEmail(message.Email, message.Title, message.Body);
-                    channel.BasicAck(ea.DeliveryTag, false);
+                    var message = JsonConvert.DeserializeObject<EmailMessage>(Encoding.UTF8.GetString(body.ToArray()));
+                    if (message != null)
+                    {
+                        _service.SendEmail(message.Email, message.Title, message.Body);
+                        channel.BasicAck(ea.DeliveryTag, false);
+                    }
                 };
 
                 channel.BasicConsume(_queueName, false, consumer);
             }
             else
             {
-                _logger.LogError($"Email service for type '{_type}' not found");
+                throw new Exception($"Email service for type '{_type}' not found");
             }
         }
 

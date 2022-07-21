@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Text;
+using EmailService.Interfaces;
 using EmailService.MessageBroker;
+using EmailService.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -84,7 +86,7 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object }, Logger.Object);
+            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
 
             listener.Run();
 
@@ -174,7 +176,7 @@ namespace EmailService.Unit.Tests
                     processedBody = bodyParam;
                 });
 
-            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object } , Logger.Object);
+            var listener = new Listener(EmailServiceType.Elastic, ConnectionFactory.Object, ConsumerFactory.Object, queueName, exchangeName, new List<IEmailService> { EmailService1.Object, EmailService2.Object });
 
             listener.Run();
             consumer.HandleBasicDeliver("consumer tag", 1, false, exchangeName, exchangeName, null, messageBody);

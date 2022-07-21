@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "EmailService\EmailService.csproj", "{B41A3626-B5E8-4887-9373-3AC6F8474631}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FA8C6280-7162-4BCB-824C-46E8D2FAC087}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Unit.Tests", "Tests\EmailService.Unit.Tests\EmailService.Unit.Tests.csproj", "{4F63377C-CAF1-4525-87C0-38C71D40F8F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Unit.Tests", "Tests\EmailService.Unit.Tests\EmailService.Unit.Tests.csproj", "{4F63377C-CAF1-4525-87C0-38C71D40F8F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
